@@ -1,6 +1,8 @@
 const sequel = require('sequelize')
 const url = require('url')
 const jwt = require('jsonwebtoken');
+const joi = require('joi');
+const Promise = require("bluebird");
 
 var Sequelize = new sequel('blog-ekurniady', 'postgres', 'taralite123', {host: '127.0.0.1', dialect:'postgres'})
 var Model = require('../../models/')
@@ -21,8 +23,6 @@ module.exports = {
                     userid: user.id,
                     username: user.username,
                 }, 'secret');
-                // var decoded = jwt.verify(token, 'secret');
-                // return decoded.username
             }else{
                 return "wrong password"
             }
@@ -37,21 +37,26 @@ module.exports = {
             updatedAt: sequel.fn("NOW"),
             user_id: request.payload.userid
         }).then(post =>{
-            if(request.payload.tagid2){
-                Model.PostTag.create({
-                    post_id: post.id,
-                    tag_id: request.payload.tagid1
-                })
-                return Model.PostTag.create({
-                    post_id: post.id,
-                    tag_id: request.payload.tagid2
-                })
-            }else{
-                return Model.PostTag.create({
-                    post_id: post.id,
-                    tag_id: request.payload.tagid1
-                })
-            }
+            return Promise.mapSeries(request.payload.tags, st => {
+                return Model.Tag.findOne({where: {name: st}})
+                    .then(tag => {
+                        if(!tag){
+                            return Model.Tag.create({
+                                name : st
+                            }).then(ntag => {
+                                return Model.PostTag.create({
+                                    post_id: post.id,
+                                    tag_id: ntag.id
+                                })
+                            })
+                        }else{
+                            return Model.PostTag.create({
+                                post_id: post.id,
+                                tag_id: tag.id
+                            })
+                        }
+                    })
+            })
         })
     },
 
@@ -69,10 +74,11 @@ module.exports = {
     },
 
     delete : (request) => {
-        Model.PostTag.destroy({where: {post_id: request.payload.postid}})
-        Model.Post.destroy({where: {id: request.payload.postid}})
-
-        return "delete success"
+        return Model.PostTag.destroy({where: {post_id: request.payload.postid}}).then(
+            () => {
+                return Model.Post.destroy({where: {id: request.payload.postid}})
+            }
+        )
     },
 
     get : (request) => {
