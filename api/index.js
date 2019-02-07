@@ -21,7 +21,7 @@ module.exports = {
             options: handlers.update
         },
         {
-            method: 'POST',
+            method: 'DELETE',
             path: '/{username}/post/delete',
             options: handlers.delete
         },

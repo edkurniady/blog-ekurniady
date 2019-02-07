@@ -10,11 +10,11 @@ module.exports = {
     update : (request) => {
         return services.update(request)
     },
-    delete : () => {
-
+    delete : (request) => {
+        return services.delete(request)
     },
-    getPost : () => {
-
+    getPost : (request) => {
+        return services.get(request)
     },
     getTag : () => {
 
