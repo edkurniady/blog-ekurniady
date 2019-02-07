@@ -12,9 +12,8 @@ const init = async () => {
     try {
         await server.register(api)
         await server.start()
-        console.log('Server running at: ${server.info.uri}')
     }catch(err) {
-        console.log('Server running at: ${server.info.uri}')
+        console.log(err)
         console.log('error!')
     }
 };

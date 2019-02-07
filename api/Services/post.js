@@ -1,32 +1,58 @@
 const sequel = require('sequelize')
 const url = require('url')
+const jwt = require('jsonwebtoken');
 
 var Sequelize = new sequel('blog-ekurniady', 'postgres', 'taralite123', {host: '127.0.0.1', dialect:'postgres'})
 var Model = require('../../models/')
 
 module.exports = {
+    signin : (request) => {
+        return Model.User.findOne({
+            where:{
+                id: request.payload.userid
+            }
+        }).then(user => {
+            if (!user) {
+                return "User Not Found"
+            }
+            if(user.password==request.payload.userpassword){
+                return jwt.sign({
+                    expiresIn: 86400,
+                    userid: user.id,
+                    username: user.username,
+                }, 'secret');
+                // var decoded = jwt.verify(token, 'secret');
+                // return decoded.username
+            }else{
+                return "wrong password"
+            }
+        })
+    },
+
     create : (request) => {
-        Model.Post.create({
+        return Model.Post.create({
             title: request.payload.title,
             content: request.payload.content,
             createdAt: sequel.fn("NOW"),
             updatedAt: sequel.fn("NOW"),
             user_id: request.payload.userid
         }).then(post =>{
-            console.log(post.id)
-            Model.PostTag.create({
-                post_id: post.id,
-                tag_id: request.payload.tagid1
-            })
             if(request.payload.tagid2){
                 Model.PostTag.create({
                     post_id: post.id,
+                    tag_id: request.payload.tagid1
+                })
+                return Model.PostTag.create({
+                    post_id: post.id,
                     tag_id: request.payload.tagid2
+                })
+            }else{
+                return Model.PostTag.create({
+                    post_id: post.id,
+                    tag_id: request.payload.tagid1
                 })
             }
         })
-
-        return "create success"
     },
 
     update : (request) => {
@@ -54,8 +80,6 @@ module.exports = {
     },
 
     getTag : (request) => {
-        
-        // Post.find({ where: { ...}, include: [User]})
         return Model.PostTag.findAll({where: {tag_id: request.payload.tagid}, include: [Model.Post]})
     }
 }

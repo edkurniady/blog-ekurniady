@@ -2,7 +2,7 @@ const services = require('../Services/post.js')
 
 module.exports = {
     signin : (request) => {
-        // return services.signin
+        return services.signin(request)
     },
     create : (request) => {
         return services.create(request)
