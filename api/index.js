@@ -12,27 +12,27 @@ module.exports = {
         },
         {
             method: 'POST',
-            path: '/{username}/post/create',
+            path: '/post/create',
             options: handlers.create
         },
         {
             method: 'PUT',
-            path: '/{username}/post/update',
+            path: '/post/update',
             options: handlers.update
         },
         {
             method: 'DELETE',
-            path: '/{username}/post/delete',
+            path: '/post/delete',
             options: handlers.delete
         },
         {
             method: 'POST',
-            path: '/{username}/post/get',
+            path: '/post/get',
             options: handlers.getPost
         },
         {
             method: 'POST',
-            path: '/{username}/tags/post/get',
+            path: '/tags/post/get',
             options: handlers.getTag
         }
     ])

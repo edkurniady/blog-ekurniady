@@ -18,10 +18,12 @@ module.exports = {
                 post_id: post.id,
                 tag_id: request.payload.tagid1
             })
-            Model.PostTag.create({
-                post_id: post.id,
-                tag_id: request.payload.tagid2
-            })
+            if(request.payload.tagid2){
+                Model.PostTag.create({
+                    post_id: post.id,
+                    tag_id: request.payload.tagid2
+                })
+            }
         })
 
         return "create success"
@@ -49,5 +51,11 @@ module.exports = {
 
     get : (request) => {
         return Model.Post.findOne({where: {id: request.payload.postid}})
+    },
+
+    getTag : (request) => {
+        
+        // Post.find({ where: { ...}, include: [User]})
+        return Model.PostTag.findAll({where: {tag_id: request.payload.tagid}, include: [Model.Post]})
     }
 }
