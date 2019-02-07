@@ -7,7 +7,7 @@ module.exports = {
     create : (request) => {
         return services.create(request)
     },
-    update : () => {
+    update : (request) => {
         return services.update(request)
     },
     delete : () => {

@@ -18,5 +18,22 @@ module.exports = {
                 user_id: user.id
             })
         })
+    },
+
+    update : (request) => {
+        return Model.Post.findOne({where: {id: request.payload.postid}})
+        .then(post => {
+            return post.updateAttributes({
+                title: request.payload.title,
+                content: request.payload.content,
+                createdAt: sequel.fn("NOW"),
+                updatedAt: sequel.fn("NOW"),
+                user_id: request.payload.userid
+            })
+        })
+    },
+
+    delete : (request) => {
+        
     }
 }
