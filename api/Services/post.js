@@ -62,14 +62,40 @@ module.exports = {
 
     update : (request) => {
         return Model.Post.findOne({where: {id: request.payload.postid}})
-        .then(post => {
-            return post.updateAttributes({
-                title: request.payload.title,
-                content: request.payload.content,
-                createdAt: sequel.fn("NOW"),
-                updatedAt: sequel.fn("NOW"),
-                user_id: request.payload.userid
-            })
+        .then(post=>{
+            if(post.user_id!=request.payload.userid){
+                return "Can't update other people's post"
+            }else{
+                return post.updateAttributes({
+                    title: request.payload.title,
+                    content: request.payload.content,
+                    updatedAt: sequel.fn("NOW"),
+                }).then(post=>{
+                    return Model.PostTag.destroy({where: {post_id: post.id}})
+                    .then(() =>{
+                        return Promise.mapSeries(request.payload.tags, st=>{
+                            return Model.Tag.findOne({where: {name: st}})
+                            .then(tag=>{
+                                if(!tag){
+                                    return Model.Tag.create({
+                                        name:st
+                                    }).then(ntag => {
+                                        return Model.PostTag.create({
+                                            post_id: post.id,
+                                            tag_id: ntag.id
+                                        })
+                                    })
+                                }else{
+                                    return Model.PostTag.create({
+                                        post_id: post.id,
+                                        tag_id: tag.id
+                                    })
+                                }
+                            })
+                        })
+                    })
+                })
+            }
         })
     },
 
