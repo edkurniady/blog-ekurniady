@@ -4,6 +4,9 @@ module.exports = {
     signin : (request) => {
         return services.signin(request)
     },
+    homepage : (request) => {
+        return services.homepage()
+    },
     create : (request) => {
         return services.create(request)
     },
@@ -14,7 +17,7 @@ module.exports = {
         return services.delete(request)
     },
     getPost : (request) => {
-        return services.get(request)
+        return services.getPost(request)
     },
     getTag : (request) => {
         return services.getTag(request)

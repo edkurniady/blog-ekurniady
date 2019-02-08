@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {timestamps: false});
   Tag.associate = function(models) {
     // associations can be defined here
+    Tag.hasMany(models.PostTag, {foreignKey: 'post_id', sourceKey: 'id'})
   };
   return Tag;
 };

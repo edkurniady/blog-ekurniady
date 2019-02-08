@@ -4,6 +4,9 @@ module.exports = {
     signin : {
         handler: userController.signin
     },
+    homepage : {
+        handler: userController.homepage
+    },
     create : {
         handler: userController.create
     },

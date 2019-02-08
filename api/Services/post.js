@@ -29,6 +29,19 @@ module.exports = {
         })
     },
 
+    homepage : () => {
+        // return Model.Post.findAll({
+        //     include:[{
+        //         model: Model.PostTag,
+        //         include: [{
+        //             model: Model.Tag,
+        //         }],
+        //     }],
+        //     where: {user_id: request.query.userid},
+        //     raw: true
+        // })
+    },
+
     create : (request) => {
         return Model.Post.create({
             title: request.payload.title,
@@ -63,39 +76,39 @@ module.exports = {
     update : (request) => {
         return Model.Post.findOne({where: {id: request.payload.postid}})
         .then(post=>{
-            if(post.user_id!=request.payload.userid){
-                return "Can't update other people's post"
-            }else{
-                return post.updateAttributes({
-                    title: request.payload.title,
-                    content: request.payload.content,
-                    updatedAt: sequel.fn("NOW"),
-                }).then(post=>{
-                    return Model.PostTag.destroy({where: {post_id: post.id}})
-                    .then(() =>{
-                        return Promise.mapSeries(request.payload.tags, st=>{
-                            return Model.Tag.findOne({where: {name: st}})
-                            .then(tag=>{
-                                if(!tag){
-                                    return Model.Tag.create({
-                                        name:st
-                                    }).then(ntag => {
-                                        return Model.PostTag.create({
-                                            post_id: post.id,
-                                            tag_id: ntag.id
-                                        })
-                                    })
-                                }else{
+            // if(post.user_id!=request.payload.userid){
+            //     return "Can't update other people's post"
+            // }else{
+            return post.updateAttributes({
+                title: request.payload.title,
+                content: request.payload.content,
+                updatedAt: sequel.fn("NOW"),
+            }).then(post=>{
+                return Model.PostTag.destroy({where: {post_id: post.id}})
+                .then(() =>{
+                    return Promise.mapSeries(request.payload.tags, st=>{
+                        return Model.Tag.findOne({where: {name: st}})
+                        .then(tag=>{
+                            if(!tag){
+                                return Model.Tag.create({
+                                    name:st
+                                }).then(ntag => {
                                     return Model.PostTag.create({
                                         post_id: post.id,
-                                        tag_id: tag.id
+                                        tag_id: ntag.id
                                     })
-                                }
-                            })
+                                })
+                            }else{
+                                return Model.PostTag.create({
+                                    post_id: post.id,
+                                    tag_id: tag.id
+                                })
+                            }
                         })
                     })
                 })
-            }
+            })
+            // }
         })
     },
 
@@ -107,11 +120,54 @@ module.exports = {
         )
     },
 
-    get : (request) => {
-        return Model.Post.findOne({where: {id: request.payload.postid}})
+    getPost : (request) => {
+        return Model.Post.findOne({
+            where: {id: request.payload.postid},
+            raw: true
+        }).then(post => {
+            return Model.PostTag.findAll({
+                include: [{
+                    model: Model.Tag
+                }],
+                attributes: [],
+                where: {post_id: post.id},
+                raw: true
+            }).then(tag => {
+                return{
+                    post: post,
+                    tag: tag
+                }
+            })
+        })
     },
 
     getTag : (request) => {
-        return Model.PostTag.findAll({where: {tag_id: request.payload.tagid}, include: [Model.Post]})
+        return Model.PostTag.findAll({
+            where: {tag_id: request.payload.tagid},
+            raw: true
+        }).then(posttag => {
+            return Promise.mapSeries(posttag, pt=>{
+                return Model.Post.findOne({
+                    where: {id: pt.post_id},
+                    raw: true
+                }).then(post => {
+                    return Model.PostTag.findAll({
+                        include: [{
+                            model: Model.Tag
+                        }],
+                        attributes: [],
+                        where: {post_id: post.id},
+                        raw: true
+                    }).then(tag => {
+                        return{
+                            post: post,
+                            tag: tag
+                        }
+                    })
+                })
+            }).then(results => {
+                return results
+            })
+        })
     }
 }

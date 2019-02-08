@@ -11,6 +11,11 @@ module.exports = {
             options: handlers.signin
         },
         {
+            method: 'GET',
+            path: '/homepage',
+            options: handlers.homepage
+        },
+        {
             method: 'POST',
             path: '/post/create',
             options: handlers.create
