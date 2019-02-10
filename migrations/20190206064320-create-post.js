@@ -27,6 +27,9 @@ module.exports = {
           model: 'Users',
           key: 'id',
         },
+      },
+      creator: {
+        type: Sequelize.STRING,
       }
     });
   },

@@ -4,25 +4,36 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.bulkInsert('Posts', [
       {
-        title: 'John Doe Post',
-        content: 'This is JD\'s post',
+        title: 'Iprem Losum',
+        content: 'Integer sit amet sapien eu dui molestie efficitur et malesuada lacus. Etiam dictum dignissim ex, eget vulputate lectus consectetur eget.',
         createdAt: Sequelize.fn('NOW'),
         updatedAt: Sequelize.fn('NOW'),
-        user_id: 1
+        user_id: 1,
+        creator: 'John Doe'
       },
       {
-        title: 'Kevin Tigra Post',
-        content: 'ktvktv',
+        title: 'Lorem Pisum',
+        content: 'Maecenas turpis turpis, fringilla sed arcu nec, commodo iaculis sem. Maecenas elit dolor, maximus a justo sed, auctor lacinia nisi.',
         createdAt: Sequelize.fn('NOW'),
         updatedAt: Sequelize.fn('NOW'),
-        user_id: 2
+        user_id: 2,
+        creator: 'Kevin Tigra'
       },
       {
-        title: 'Edward Kurniady',
-        content: 'Pepega',
+        title: 'Lorem Ipsum 1',
+        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         createdAt: Sequelize.fn('NOW'),
         updatedAt: Sequelize.fn('NOW'),
-        user_id: 3
+        user_id: 3,
+        creator: 'Edward Kurniady'
+      },
+      {
+        title: 'Lorem Ipsum 2',
+        content: 'Praesent vel ante sodales nulla pellentesque hendrerit. Nam velit mi, varius a felis blandit, consectetur posuere nisi. Sed sed laoreet quam, sit amet accumsan augue.',
+        createdAt: Sequelize.fn('NOW'),
+        updatedAt: Sequelize.fn('NOW'),
+        user_id: 3,
+        creator: 'Edward Kurniady'
       }
     ], {});
   },

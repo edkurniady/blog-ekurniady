@@ -11,9 +11,19 @@ module.exports = {
             options: handlers.signin
         },
         {
+            method: 'POST',
+            path: '/register',
+            options: handlers.register
+        },
+        {
             method: 'GET',
-            path: '/homepage',
+            path: '/home',
             options: handlers.homepage
+        },
+        {
+            method: 'POST',
+            path: '/yourposts',
+            options: handlers.yourposts
         },
         {
             method: 'POST',
@@ -26,7 +36,7 @@ module.exports = {
             options: handlers.update
         },
         {
-            method: 'DELETE',
+            method: 'POST',
             path: '/post/delete',
             options: handlers.delete
         },

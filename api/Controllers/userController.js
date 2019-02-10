@@ -4,8 +4,14 @@ module.exports = {
     signin : (request) => {
         return services.signin(request)
     },
-    homepage : (request) => {
+    register:(request) => {
+        return services.register(request)
+    },
+    homepage : () => {
         return services.homepage()
+    },
+    yourposts : (request) => {
+        return services.yourposts(request)
     },
     create : (request) => {
         return services.create(request)

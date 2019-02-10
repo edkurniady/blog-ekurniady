@@ -11,35 +11,111 @@ module.exports = {
     signin : (request) => {
         return Model.User.findOne({
             where:{
-                id: request.payload.userid
+                username: request.payload.username
             }
         }).then(user => {
             if (!user) {
-                return "User Not Found"
+                return "usererror"
             }
-            if(user.password==request.payload.userpassword){
+            if(user.password==request.payload.password){
                 return jwt.sign({
-                    expiresIn: 86400,
                     userid: user.id,
-                    username: user.username,
+                    username: user.name,
                 }, 'secret');
             }else{
-                return "wrong password"
+                return "pwerror"
+            }
+        })
+    },
+
+    register : (request) => {
+        return Model.User.findOne({
+            where:{
+                username: request.payload.username
+            }
+        }).then(used => {
+            if(used){
+                return "taken"
+            }else{
+                return Model.User.create({
+                    name: request.payload.name,
+                    email: request.payload.email,
+                    username: request.payload.username,
+                    password: request.payload.password
+                })
             }
         })
     },
 
     homepage : () => {
-        // return Model.Post.findAll({
-        //     include:[{
-        //         model: Model.PostTag,
-        //         include: [{
-        //             model: Model.Tag,
-        //         }],
-        //     }],
-        //     where: {user_id: request.query.userid},
-        //     raw: true
-        // })
+        return Model.Post.findAll({
+            raw: true
+        }).then(post => {
+            return Promise.mapSeries(post, p => {
+                return Model.PostTag.findAll({
+                    raw: true,
+                    where: {post_id: p.id},
+                    attributes: [],
+                    include: [{
+                        model: Model.Tag
+                    }]
+                }).then(tag => {
+                    var tagname = []
+
+                    for(var i = 0; i<tag.length; i++){
+                        tagname.push(tag[i]['Tag.name'])
+                    }
+
+                    return {
+                        id: p.id,
+                        title: p.title,
+                        content: p.content,
+                        creator: p.creator,
+                        createdAt: p.createdAt,
+                        updatedAt: p.updatedAt,
+                        tags: tagname
+                    }
+                })
+            }).then(res => {
+                return res
+            })
+        })
+    },
+
+    yourposts : (request) => {
+        return Model.Post.findAll({
+            raw: true,
+            where: {user_id : jwt.decode(request.payload.token).userid}
+        }).then(post => {
+            return Promise.mapSeries(post, p => {
+                return Model.PostTag.findAll({
+                    raw: true,
+                    where: {post_id: p.id},
+                    attributes: [],
+                    include: [{
+                        model: Model.Tag
+                    }]
+                }).then(tag => {
+                    var tagname = []
+
+                    for(var i = 0; i<tag.length; i++){
+                        tagname.push(tag[i]['Tag.name'])
+                    }
+
+                    return {
+                        id: p.id,
+                        title: p.title,
+                        content: p.content,
+                        creator: p.creator,
+                        createdAt: p.createdAt,
+                        updatedAt: p.updatedAt,
+                        tags: tagname
+                    }
+                })
+            }).then(res => {
+                return res
+            })
+        })
     },
 
     create : (request) => {
@@ -48,7 +124,8 @@ module.exports = {
             content: request.payload.content,
             createdAt: sequel.fn("NOW"),
             updatedAt: sequel.fn("NOW"),
-            user_id: request.payload.userid
+            user_id: jwt.decode(request.payload.token).userid,
+            creator: jwt.decode(request.payload.token).username
         }).then(post =>{
             return Promise.mapSeries(request.payload.tags, st => {
                 return Model.Tag.findOne({where: {name: st}})
@@ -76,9 +153,6 @@ module.exports = {
     update : (request) => {
         return Model.Post.findOne({where: {id: request.payload.postid}})
         .then(post=>{
-            // if(post.user_id!=request.payload.userid){
-            //     return "Can't update other people's post"
-            // }else{
             return post.updateAttributes({
                 title: request.payload.title,
                 content: request.payload.content,
@@ -108,7 +182,6 @@ module.exports = {
                     })
                 })
             })
-            // }
         })
     },
 
@@ -133,40 +206,66 @@ module.exports = {
                 where: {post_id: post.id},
                 raw: true
             }).then(tag => {
-                return{
-                    post: post,
-                    tag: tag
+                var tagname = []
+
+                for(var i = 0; i<tag.length; i++){
+                    tagname.push(tag[i]['Tag.name'])
+                }
+
+                return {
+                    id: post.id,
+                    title: post.title,
+                    content: post.content,
+                    creator: post.creator,
+                    createdAt: post.createdAt,
+                    updatedAt: post.updatedAt,
+                    tags: tagname
                 }
             })
         })
     },
 
     getTag : (request) => {
-        return Model.PostTag.findAll({
-            where: {tag_id: request.payload.tagid},
-            raw: true
-        }).then(posttag => {
-            return Promise.mapSeries(posttag, pt=>{
-                return Model.Post.findOne({
-                    where: {id: pt.post_id},
-                    raw: true
-                }).then(post => {
-                    return Model.PostTag.findAll({
-                        include: [{
-                            model: Model.Tag
-                        }],
-                        attributes: [],
-                        where: {post_id: post.id},
+        return Model.Tag.findOne({
+            where: {name: request.payload.name}
+        }).then(t => {
+            return Model.PostTag.findAll({
+                where: {tag_id: t.id},
+                raw: true
+            }).then(posttag => {
+                return Promise.mapSeries(posttag, pt=>{
+                    return Model.Post.findOne({
+                        where: {id: pt.post_id},
                         raw: true
-                    }).then(tag => {
-                        return{
-                            post: post,
-                            tag: tag
-                        }
+                    }).then(post => {
+                        return Model.PostTag.findAll({
+                            include: [{
+                                model: Model.Tag
+                            }],
+                            attributes: [],
+                            where: {post_id: post.id},
+                            raw: true
+                        }).then(tag => {
+                            var tagname = []
+
+                            for(var i = 0; i<tag.length; i++){
+                                tagname.push(tag[i]['Tag.name'])
+                            }
+
+                            return {
+                                id: post.id,
+                                title: post.title,
+                                content: post.content,
+                                creator: post.creator,
+                                createdAt: post.createdAt,
+                                updatedAt: post.updatedAt,
+                                tags: tagname
+                            }
+                        })
                     })
+                }).then(results => {
+                    return results
                 })
-            }).then(results => {
-                return results
             })
         })
     }

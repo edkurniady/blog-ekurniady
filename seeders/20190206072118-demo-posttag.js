@@ -18,6 +18,14 @@ module.exports = {
       {
         post_id: 3,
         tag_id: 3
+      },
+      {
+        post_id: 4,
+        tag_id: 1
+      },
+      {
+        post_id: 4,
+        tag_id: 3
       }
     ], {});
   },

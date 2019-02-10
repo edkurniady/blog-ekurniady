@@ -4,8 +4,11 @@ const Hapi = require('hapi')
 const api = require("./api")
 
 const server = Hapi.server({
-    port: 3000,
-    host: 'localhost'
+    port: 5000,
+    host: 'localhost',
+    routes: {
+        cors: true
+    }
 });
 
 const init = async () => {

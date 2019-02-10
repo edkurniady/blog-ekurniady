@@ -4,8 +4,14 @@ module.exports = {
     signin : {
         handler: userController.signin
     },
+    register:{
+        handler: userController.register
+    },
     homepage : {
         handler: userController.homepage
+    },
+    yourposts : {
+        handler: userController.yourposts
     },
     create : {
         handler: userController.create
